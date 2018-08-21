@@ -3,9 +3,13 @@ package com.capgemini.jstk.transactionregistration.domain;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
 
+@Entity
+@Table(name = "PRODUCT")
 public class ProductEntity extends AbstractEntity implements Serializable {
 	private static final long serialVersionUID = 7734662192684689750L;
 

@@ -10,7 +10,6 @@ import javax.persistence.TemporalType;
 
 import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
 
-
 @Entity
 @Table(name = "CUSTOMER")
 public class CustomerEntity extends AbstractEntity implements Serializable {
