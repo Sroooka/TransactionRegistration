@@ -5,22 +5,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 
 import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 
 @Entity
 @Table(name = "TRANSACTION")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class TransactionEntity extends AbstractEntity implements Serializable {
 	private static final long serialVersionUID = 7386021909131036194L;
 

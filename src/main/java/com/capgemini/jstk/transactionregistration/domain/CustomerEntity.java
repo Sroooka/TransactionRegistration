@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -16,6 +18,7 @@ import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
 
 @Entity
 @Table(name = "CUSTOMER")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class CustomerEntity extends AbstractEntity implements Serializable {
 	private static final long serialVersionUID = 2074780602801252300L;
 	

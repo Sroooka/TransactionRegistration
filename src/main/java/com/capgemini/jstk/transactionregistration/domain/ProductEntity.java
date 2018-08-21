@@ -6,6 +6,8 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
@@ -13,6 +15,7 @@ import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
 
 @Entity
 @Table(name = "PRODUCT")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class ProductEntity extends AbstractEntity implements Serializable {
 	private static final long serialVersionUID = 7734662192684689750L;
 
