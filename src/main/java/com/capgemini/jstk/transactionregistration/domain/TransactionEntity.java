@@ -1,9 +1,15 @@
 package com.capgemini.jstk.transactionregistration.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -22,6 +28,16 @@ public class TransactionEntity extends AbstractEntity implements Serializable {
 	private TransactionStatus status;
 	
 	private int productsAmount = 0;
+	
+	@ManyToOne
+	private CustomerEntity customer;
+	
+	@ManyToMany
+    @JoinTable(name = "DEAL",
+            joinColumns = {@JoinColumn(name = "TRANSACTION_ID")},
+            inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID")}
+    )
+    private Collection<ProductEntity> cart = new ArrayList<>();
 
 	public TransactionEntity() {
 		super();

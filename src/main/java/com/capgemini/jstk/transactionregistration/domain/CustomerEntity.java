@@ -2,8 +2,11 @@ package com.capgemini.jstk.transactionregistration.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -27,6 +30,9 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 	
 	@Temporal(TemporalType.DATE)
 	private Date birth;
+	
+	@OneToMany(mappedBy = "customer")
+    Set<TransactionEntity> transaction = new HashSet<>();
 
 	public CustomerEntity() {
 		super();

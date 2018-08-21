@@ -1,9 +1,12 @@
 package com.capgemini.jstk.transactionregistration.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
@@ -23,6 +26,9 @@ public class ProductEntity extends AbstractEntity implements Serializable {
 	@Column(precision=10, scale = 4)
 	private double weight;
 
+	@ManyToMany (mappedBy = "cart")
+	private Collection<TransactionEntity> transactions = new ArrayList<>();
+	
 	public ProductEntity() {
 		super();
 	}
