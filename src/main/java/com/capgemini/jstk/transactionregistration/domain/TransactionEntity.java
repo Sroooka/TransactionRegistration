@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -25,6 +27,7 @@ public class TransactionEntity extends AbstractEntity implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date date;
 	
+	@Enumerated(EnumType.STRING)
 	private TransactionStatus status;
 	
 	private int productsAmount = 0;

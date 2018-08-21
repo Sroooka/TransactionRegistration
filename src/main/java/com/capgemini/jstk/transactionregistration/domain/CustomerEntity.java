@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -31,7 +32,7 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date birth;
 	
-	@OneToMany(mappedBy = "customer")
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
     Set<TransactionEntity> transaction = new HashSet<>();
 
 	public CustomerEntity() {
