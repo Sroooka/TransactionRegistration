@@ -28,7 +28,7 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 	
 	private String email;
 	
-	private String telephone;
+	private String phone;
 	
 	private String address;
 	
@@ -66,12 +66,12 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 		this.email = email;
 	}
 
-	public String getTelephone() {
-		return telephone;
+	public String getPhone() {
+		return phone;
 	}
 
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
+	public void setPhone(String telephone) {
+		this.phone = telephone;
 	}
 
 	public String getAddress() {
