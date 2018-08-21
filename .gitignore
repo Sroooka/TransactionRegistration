@@ -602,3 +602,13 @@ secrets.yml
 
 # Allow
 *.png
+/target/
+/target/
+/target/
+/target/
+/target/
+/target/
+/target/
+/target/
+/target/
+/target/
