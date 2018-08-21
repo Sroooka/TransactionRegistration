@@ -1,4 +1,4 @@
-package com.capgemini.jstk.transactionregistration.domain.impl;
+package com.capgemini.jstk.transactionregistration.domain;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.capgemini.jstk.transactionregistration.domain.impl.AbstractEntity;
 
 
 @Entity
