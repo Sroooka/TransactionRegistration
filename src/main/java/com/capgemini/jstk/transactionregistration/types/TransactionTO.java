@@ -20,21 +20,21 @@ public class TransactionTO {
 	
 	private Long customerId;
 	
-    private Collection<Long> cartIds = new HashSet<>();
+    private Collection<Long> productIds = new HashSet<>();
 
 	public TransactionTO() {
 		super();
 	}
 
 	public TransactionTO(Long id, Date date, TransactionStatus status, int productsAmount, Long customerId,
-			Collection<Long> cartIds) {
+			Collection<Long> productIds) {
 		super();
 		this.id = id;
 		this.date = date;
 		this.status = status;
 		this.productsAmount = productsAmount;
 		this.customerId = customerId;
-		this.cartIds = cartIds;
+		this.productIds = productIds;
 	}
 	
 	public static class TransactionTOBuilder{
@@ -49,7 +49,7 @@ public class TransactionTO {
 		
 		private Long customerId;
 		
-	    private Collection<Long> cartIds = new HashSet<>();
+	    private Collection<Long> productIds = new HashSet<>();
 	    
 	    public TransactionTOBuilder() {
 			super();
@@ -80,18 +80,18 @@ public class TransactionTO {
 			return this;
 		}
 	    
-	    public TransactionTOBuilder withCartIds(Collection<Long> cartIds) {
-			this.cartIds = cartIds;
+	    public TransactionTOBuilder withProductIds(Collection<Long> productIds) {
+			this.productIds = productIds;
 			return this;
 		}
 	    
 	    public TransactionTO build() {
-			checkBeforeBuild(date, status, productsAmount, customerId, cartIds);
-			return new TransactionTO(id, date, status, productsAmount, customerId, cartIds);
+			checkBeforeBuild(date, status, productsAmount, customerId, productIds);
+			return new TransactionTO(id, date, status, productsAmount, customerId, productIds);
 		}
 
 		private void checkBeforeBuild(Date date, TransactionStatus status, int productsAmount, Long customerId,
-				Collection<Long> cartIds) {
+				Collection<Long> productIds) {
 			boolean canThrowException = false;
 			String errorMessage = " ";
 			if (date == null || date.before(new GregorianCalendar(1900, 1, 1).getTime())) {
@@ -149,11 +149,11 @@ public class TransactionTO {
 		this.customerId = customerId;
 	}
 
-	public Collection<Long> getCartIds() {
-		return cartIds;
+	public Collection<Long> getProductIds() {
+		return productIds;
 	}
 
-	public void setCartIds(Collection<Long> cartIds) {
-		this.cartIds = cartIds;
+	public void setProductIds(Collection<Long> cartIds) {
+		this.productIds = cartIds;
 	}
 }

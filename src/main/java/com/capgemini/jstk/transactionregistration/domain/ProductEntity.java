@@ -29,7 +29,7 @@ public class ProductEntity extends AbstractEntity implements Serializable {
 	@Column(precision=10, scale = 4)
 	private double weight;
 
-	@ManyToMany (mappedBy = "cart")
+	@ManyToMany (mappedBy = "products")
 	private Collection<TransactionEntity> transactions = new ArrayList<>();
 	
 	public ProductEntity() {

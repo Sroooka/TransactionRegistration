@@ -22,6 +22,7 @@ public class TransactionEntity extends AbstractEntity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private TransactionStatus status;
 	
+	@Transient
 	private int productsAmount = 0;
 	
 	@ManyToOne
@@ -32,10 +33,16 @@ public class TransactionEntity extends AbstractEntity implements Serializable {
             joinColumns = {@JoinColumn(name = "TRANSACTION_ID")},
             inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID")}
     )
-    private Collection<ProductEntity> cart = new ArrayList<>();
+    private Collection<ProductEntity> products = new ArrayList<>();
 
 	public TransactionEntity() {
 		super();
+	}
+	
+	@PostPersist
+	@PostUpdate
+	private void updateProductsAmount(){
+		this.productsAmount = products.size();
 	}
 
 	public Date getDate() {
@@ -60,5 +67,21 @@ public class TransactionEntity extends AbstractEntity implements Serializable {
 
 	public void setProductsAmount(int productsAmount) {
 		this.productsAmount = productsAmount;
+	}
+
+	public CustomerEntity getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(CustomerEntity customer) {
+		this.customer = customer;
+	}
+
+	public Collection<ProductEntity> getProducts() {
+		return products;
+	}
+
+	public void setProducts(Collection<ProductEntity> cart) {
+		this.products = cart;
 	}
 }
