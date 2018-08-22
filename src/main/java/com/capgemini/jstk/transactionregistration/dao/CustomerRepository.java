@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
 
-@Repository
-public interface CustomerRepository extends CrudRepository<CustomerEntity, Long> {
+public interface CustomerRepository extends CrudRepository<CustomerEntity, Long>,  CustomerRepositoryCustom {
 
 }

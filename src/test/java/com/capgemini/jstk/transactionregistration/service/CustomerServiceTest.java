@@ -110,6 +110,19 @@ public class CustomerServiceTest {
 		customerService.deleteCustomer(savedCustomer);
 	}
 	
+	@Test
+	public void shouldReturnCorrectSize(){
+		//given when
+		int sizeBeforeAdding = customerService.size();
+		for(int i=0; i<10; i++){
+			customerService.saveCustomer(getCustomerKowalski());
+		}
+		int sizeAfterAdding = customerService.size();
+		
+		// then
+		assertEquals(10, sizeAfterAdding - sizeBeforeAdding);
+	}
+	
 	private CustomerTO getCustomerKowalski(){
 		return new CustomerTOBuilder()
 				.withName("Jan")
