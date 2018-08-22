@@ -66,5 +66,13 @@ public class ProductEntity extends AbstractEntity implements Serializable {
 
 	public void setWeight(double weight) {
 		this.weight = weight;
-	}	
+	}
+	
+	public Collection<TransactionEntity> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(Collection<TransactionEntity> transactions) {
+		this.transactions = transactions;
+	}
 }
