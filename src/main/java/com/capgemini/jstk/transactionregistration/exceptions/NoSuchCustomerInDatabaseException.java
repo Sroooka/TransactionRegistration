@@ -8,6 +8,6 @@ public class NoSuchCustomerInDatabaseException extends RuntimeException {
 	}
 	
 	public NoSuchCustomerInDatabaseException(String message) {
-		super("Missing arguments to create! " + message);
+		super("Customer not found in database! " + message);
 	}
 }

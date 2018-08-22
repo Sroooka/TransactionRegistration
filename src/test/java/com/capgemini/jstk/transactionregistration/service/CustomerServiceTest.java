@@ -3,14 +3,7 @@ package com.capgemini.jstk.transactionregistration.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
-
-import javax.management.InvalidApplicationException;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

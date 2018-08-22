@@ -95,7 +95,7 @@ public class ProductTO {
 				canThrowException = true;
 				errorMessage += "[Name] ";
 			}
-			if (unitPrice > 0) {
+			if (unitPrice <= 0) {
 				canThrowException = true;
 				errorMessage += "[Unit Price] ";
 			}
