@@ -1,9 +1,9 @@
 package com.capgemini.jstk.transactionregistration.types;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.exceptions.MissingAttributeException;
@@ -20,7 +20,7 @@ public class TransactionTO {
 	
 	private Long customerId;
 	
-    private Collection<Long> cartIds = new ArrayList<>();
+    private Collection<Long> cartIds = new HashSet<>();
 
 	public TransactionTO() {
 		super();
@@ -49,7 +49,7 @@ public class TransactionTO {
 		
 		private Long customerId;
 		
-	    private Collection<Long> cartIds = new ArrayList<>();
+	    private Collection<Long> cartIds = new HashSet<>();
 	    
 	    public TransactionTOBuilder() {
 			super();

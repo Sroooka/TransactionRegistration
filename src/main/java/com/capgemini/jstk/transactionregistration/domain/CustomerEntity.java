@@ -36,7 +36,7 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 	private Date birth;
 	
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
-    Set<TransactionEntity> transaction = new HashSet<>();
+    Set<TransactionEntity> transactions = new HashSet<>();
 
 	public CustomerEntity() {
 		super();
@@ -88,5 +88,13 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 
 	public void setBirth(Date birth) {
 		this.birth = birth;
+	}
+
+	public Set<TransactionEntity> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(Set<TransactionEntity> transaction) {
+		this.transactions = transaction;
 	}
 }

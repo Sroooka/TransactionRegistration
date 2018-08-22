@@ -32,4 +32,12 @@ public abstract class AbstractEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column
 	private Date updated;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 }

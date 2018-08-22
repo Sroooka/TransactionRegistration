@@ -1,7 +1,8 @@
 package com.capgemini.jstk.transactionregistration.types;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+
 import com.capgemini.jstk.transactionregistration.exceptions.MissingAttributeException;
 
 public class ProductTO {
@@ -16,7 +17,7 @@ public class ProductTO {
 	
 	private double weight;
 	
-	private Collection<Long> transactionIds = new ArrayList<>();
+	private Collection<Long> transactionIds = new HashSet<>();
 
 	public ProductTO() {
 		super();
@@ -45,7 +46,7 @@ public class ProductTO {
 		
 		private double weight;
 		
-		private Collection<Long> transactionIds = new ArrayList<>();
+		private Collection<Long> transactionIds = new HashSet<>();
 		
 		public ProductTOBuilder() {
 			super();

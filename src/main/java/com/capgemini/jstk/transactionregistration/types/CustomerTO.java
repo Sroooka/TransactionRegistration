@@ -1,10 +1,10 @@
 package com.capgemini.jstk.transactionregistration.types;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Set;
-
+import java.util.List;
 import com.capgemini.jstk.transactionregistration.exceptions.MissingAttributeException;
 
 public class CustomerTO {
@@ -23,14 +23,14 @@ public class CustomerTO {
 
 	private Date birth;
 
-	Set<Long> transactionsId = new HashSet<>();
+	Collection<Long> transactionIds = new HashSet<>();
 
 	public CustomerTO() {
 		super();
 	}
 
 	public CustomerTO(Long id, String name, String surname, String email, String phone, String address, Date birth,
-			Set<Long> transactionsId) {
+			Collection<Long> transactionIds) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -39,7 +39,7 @@ public class CustomerTO {
 		this.phone = phone;
 		this.address = address;
 		this.birth = birth;
-		this.transactionsId = transactionsId;
+		this.transactionIds = transactionIds;
 	}
 
 	public static class CustomerTOBuilder {
@@ -58,7 +58,7 @@ public class CustomerTO {
 
 		private Date birth;
 
-		Set<Long> transactionIds = new HashSet<>();
+		Collection<Long> transactionIds = new HashSet<>();
 
 		public CustomerTOBuilder() {
 			super();
@@ -74,7 +74,7 @@ public class CustomerTO {
 			return this;
 		}
 
-		public CustomerTOBuilder withSurame(String surname) {
+		public CustomerTOBuilder withSurname(String surname) {
 			this.surname = surname;
 			return this;
 		}
@@ -99,7 +99,7 @@ public class CustomerTO {
 			return this;
 		}
 		
-		public CustomerTOBuilder withTrasactionIds(Set<Long> transactionIds) {
+		public CustomerTOBuilder withTrasactionIds(Collection<Long> transactionIds) {
 			this.transactionIds = transactionIds;
 			return this;
 		}
@@ -110,7 +110,7 @@ public class CustomerTO {
 		}
 
 		private void checkBeforeBuild(String name, String surname, String email, String phone, String address,
-				Date birth, Set<Long> transactionIds) throws MissingAttributeException {
+				Date birth, Collection<Long> transactionIds) throws MissingAttributeException {
 			boolean canThrowException = false;
 			String errorMessage = " ";
 			if (name == null || name.isEmpty()) {
@@ -194,11 +194,11 @@ public class CustomerTO {
 		this.birth = birth;
 	}
 
-	public Set<Long> getTransactionsId() {
-		return transactionsId;
+	public Collection<Long> getTransactionIds() {
+		return transactionIds;
 	}
 
-	public void setTransactionsId(Set<Long> transactionsId) {
-		this.transactionsId = transactionsId;
+	public void setTransactionIds(List<Long> transactionsId) {
+		this.transactionIds = transactionsId;
 	}
 }
