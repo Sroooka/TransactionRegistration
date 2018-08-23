@@ -13,12 +13,13 @@ public class TransactionMapper {
 		if (transactionEntity == null) {
 			return null;
 		}
+		Long customerId = (transactionEntity.getCustomer() == null) ? -1L : transactionEntity.getCustomer().getId();
 		return new TransactionTOBuilder()
 				.withId(transactionEntity.getId())
 				.withDate(transactionEntity.getDate())
 				.withTransactionStatus(transactionEntity.getStatus())
 				.withProductsAmount(transactionEntity.getProductsAmount())
-				.withCustomerId(transactionEntity.getCustomer().getId())
+				.withCustomerId(customerId)
 				.withProductIds(transactionEntity.getProducts()
 						.stream()
 						.map(s -> s.getId())
