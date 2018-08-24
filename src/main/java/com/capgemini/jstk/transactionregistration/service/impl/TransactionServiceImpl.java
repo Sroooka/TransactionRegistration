@@ -1,6 +1,7 @@
 package com.capgemini.jstk.transactionregistration.service.impl;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,5 +109,10 @@ public class TransactionServiceImpl implements TransactionService {
 		customerEntity.getTransactions().add(transactionEntity);
 		transactionRepository.save(transactionEntity);
 		customerRepository.save(customerEntity);
+	}
+
+	@Override
+	public List<TransactionTO> findByProductsAmount(int amount) {
+		return TransactionMapper.map2TOs(transactionRepository.findByProductsAmount(amount));
 	}
 }

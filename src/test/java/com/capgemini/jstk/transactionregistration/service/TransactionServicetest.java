@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +23,8 @@ import com.capgemini.jstk.transactionregistration.exceptions.NoSuchTransactionIn
 import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO.CustomerTOBuilder;
+import com.capgemini.jstk.transactionregistration.types.ProductTO;
+import com.capgemini.jstk.transactionregistration.types.ProductTO.ProductTOBuilder;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO.TransactionTOBuilder;
 
 @Transactional
@@ -35,6 +38,9 @@ public class TransactionServicetest {
 	
 	@Autowired
 	CustomerService customerService;
+	
+	@Autowired
+	ProductService productService;
 	
 	@Test
 	public void shouldAddAndFindTransactionById(){
@@ -147,6 +153,25 @@ public class TransactionServicetest {
 		assertEquals(10, sizeAfterAdding - sizeBeforeAdding);
 	}
 	
+	@Test
+	public void shouldFindByMinimalProductAmount(){
+		//given
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		HashSet<Long> productIdList = new HashSet<>();
+		productIdList.add(savedProduct.getId());
+		for (int i = 0; i < 100; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
+		
+		//when
+		List<TransactionTO> foundTransactions = transactionService.findByProductsAmount(99);
+		
+		//when
+		assertEquals(foundTransactions.get(0).getId(), savedTransaction.getId());
+	}
+	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())
@@ -184,6 +209,15 @@ public class TransactionServicetest {
 				.withPhone("321-321-321")
 				.withAddress("Poznan, ul. Dluga 1")
 				.withBirth(new GregorianCalendar(1990, 12, 7).getTime())
+				.build();
+	}
+	
+	private ProductTO getProduct(){
+		return new ProductTOBuilder()
+				.withName("Simple product")
+				.withMarginPercent(0)
+				.withUnitPrice(500)
+				.withWeight(10.0)
 				.build();
 	}
 }

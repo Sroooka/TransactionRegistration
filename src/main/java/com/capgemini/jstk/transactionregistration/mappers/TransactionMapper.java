@@ -1,6 +1,7 @@
 package com.capgemini.jstk.transactionregistration.mappers;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
@@ -38,11 +39,11 @@ public class TransactionMapper {
 		return transactionEntity;
 	}
 	
-	public static Collection<TransactionTO> map2TOs(Collection<TransactionEntity> transactionEntities) {
-		return transactionEntities.stream().map(TransactionMapper::toTransactionTO).collect(Collectors.toSet());
+	public static List<TransactionTO> map2TOs(Collection<TransactionEntity> transactionEntities) {
+		return transactionEntities.stream().map(TransactionMapper::toTransactionTO).collect(Collectors.toList());
 	}
 	
-	public static Collection<TransactionEntity> map2Entities(Collection<TransactionTO> transactionTOs) {
-		return transactionTOs.stream().map(TransactionMapper::toTransactionEntity).collect(Collectors.toSet());
+	public static List<TransactionEntity> map2Entities(Collection<TransactionTO> transactionTOs) {
+		return transactionTOs.stream().map(TransactionMapper::toTransactionEntity).collect(Collectors.toList());
 	}
 }

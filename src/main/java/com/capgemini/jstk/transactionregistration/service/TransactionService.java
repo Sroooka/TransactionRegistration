@@ -1,5 +1,8 @@
 package com.capgemini.jstk.transactionregistration.service;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
 
 public interface TransactionService {
@@ -10,4 +13,5 @@ public interface TransactionService {
 	public int size();
 	public TransactionTO findTransactionById(Long id);
 	public void setCustomerInTransaction(Long transactionId, Long customerId);
+	public List<TransactionTO> findByProductsAmount(int amount);
 }
