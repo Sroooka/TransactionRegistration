@@ -39,7 +39,7 @@ public class TransactionTO {
 	
 	public static class TransactionTOBuilder{
 
-		private Long id;
+		private Long id = 0L;
 		
 		private Date date;
 		

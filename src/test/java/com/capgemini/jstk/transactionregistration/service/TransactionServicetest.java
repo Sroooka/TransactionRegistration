@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
+import com.capgemini.jstk.transactionregistration.exceptions.NoSuchCustomerInDatabaseException;
+import com.capgemini.jstk.transactionregistration.exceptions.NoSuchProductInDatabaseException;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchTransactionInDatabaseException;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
@@ -35,9 +39,8 @@ public class TransactionServicetest {
 	@Test
 	public void shouldAddAndFindTransactionById(){
 		//given
-		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised());
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		transactionService.setCustomerInTransaction(savedTransaction.getId(), savedCustomer.getId());
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
 		//when
 		TransactionTO foundTransaction = transactionService.findTransactionById(savedTransaction.getId());
 		
@@ -47,12 +50,28 @@ public class TransactionServicetest {
 		assertEquals(foundTransaction.getStatus(), TransactionStatus.REALISED);
 	}
 	
+	@Test (expected = NoSuchCustomerInDatabaseException.class)
+	public void shouldReturnErrorWhenCreatingTransactionWithNonExistingCustomer(){
+		//given when then
+		transactionService.saveTransaction(getTransactionRealised(1L, new HashSet<Long>()));
+	}
+	
+	@Test (expected = NoSuchProductInDatabaseException.class)
+	public void shouldReturnErrorWhenCreatingTransactionWithNonExistingProducts(){
+		//given 
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		HashSet<Long> productIdList = new HashSet<>();
+		productIdList.add(1234L);
+
+		//when then
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+	}
+	
 	@Test (expected = NoSuchTransactionInDatabaseException.class)
 	public void shouldThrowExceptionWhenFindingNonExistingTransaction(){
 		//given
-		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised());
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		transactionService.setCustomerInTransaction(savedTransaction.getId(), savedCustomer.getId());
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
 		
 		//when then
 		transactionService.findTransactionById(savedTransaction.getId() + 123123L);
@@ -61,10 +80,9 @@ public class TransactionServicetest {
 	@Test
 	public void shouldUpdateTransaction(){
 		//given
-		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised());
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		transactionService.setCustomerInTransaction(savedTransaction.getId(), savedCustomer.getId());
-		TransactionTO updatedTransaction = getTransactionCanceled(123123L, null);
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
+		TransactionTO updatedTransaction = getTransactionCanceled(123123L, new HashSet<Long>());
 		updatedTransaction.setId(savedTransaction.getId());
 		
 		//when
@@ -81,11 +99,10 @@ public class TransactionServicetest {
 	@Test (expected = NoSuchTransactionInDatabaseException.class)
 	public void shouldReturnErrorWhenUpdatingNonExistingTransaction(){
 		//given
-		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised());
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		transactionService.setCustomerInTransaction(savedTransaction.getId(), savedCustomer.getId());
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
 		
-		TransactionTO updatedTransaction = getTransactionRealised();
+		TransactionTO updatedTransaction = getTransactionRealised(savedCustomer.getId(), new HashSet<Long>());
 		updatedTransaction.setId(savedTransaction.getId() + 123123L);
 		
 		//when then
@@ -94,10 +111,9 @@ public class TransactionServicetest {
 	
 	@Test
 	public void shouldDeleteTransaction(){
-		//given
-		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(1L, null));
+		//given		
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		transactionService.setCustomerInTransaction(savedTransaction.getId(), savedCustomer.getId());
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
 		
 		//when
 		transactionService.deleteTransaction(savedTransaction);
@@ -109,9 +125,8 @@ public class TransactionServicetest {
 	@Test (expected = NoSuchTransactionInDatabaseException.class)
 	public void shouldReturnErrorWhenDeletingNonExistingTransaction(){
 		//given
-		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(1L, null));
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		transactionService.setCustomerInTransaction(savedTransaction.getId(), savedCustomer.getId());
+		TransactionTO savedTransaction = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
 		savedTransaction.setId(savedTransaction.getId() + 123123L);
 		
 		//when then
@@ -121,9 +136,10 @@ public class TransactionServicetest {
 	@Test
 	public void shouldReturnCorrectSize(){
 		//given when
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
 		int sizeBeforeAdding = transactionService.size();
 		for(int i=0; i<10; i++){
-			transactionService.saveTransaction(getTransactionRealised(1L, null));
+			transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), new HashSet<Long>()));
 		}
 		int sizeAfterAdding = transactionService.size();
 		
@@ -145,20 +161,6 @@ public class TransactionServicetest {
 				.withDate(new GregorianCalendar(2018, 7, 25).getTime())
 				.withCustomerId(customerId)
 				.withProductIds(productIds)
-				.withTransactionStatus(TransactionStatus.CANCELED)
-				.build();
-	}
-	
-	private TransactionTO getTransactionRealised(){
-		return new TransactionTOBuilder()
-				.withDate(new GregorianCalendar(2018, 7, 15).getTime())
-				.withTransactionStatus(TransactionStatus.REALISED)
-				.build();
-	}
-	
-	private TransactionTO getTransactionCanceled(){
-		return new TransactionTOBuilder()
-				.withDate(new GregorianCalendar(2018, 7, 25).getTime())
 				.withTransactionStatus(TransactionStatus.CANCELED)
 				.build();
 	}
