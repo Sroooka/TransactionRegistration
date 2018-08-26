@@ -6,7 +6,7 @@ import java.util.List;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
 
 public interface TransactionService {
-	public TransactionTO saveTransaction(TransactionTO transaction);
+	public List<TransactionTO> saveTransaction(TransactionTO transaction);
 	public TransactionTO updateTransaction(TransactionTO transaction);
 	public TransactionTO deleteTransaction(TransactionTO transaction);
 	public boolean contains(Long id);
