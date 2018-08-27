@@ -18,6 +18,7 @@ import com.capgemini.jstk.transactionregistration.dao.ProductRepository;
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepository;
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
+import com.capgemini.jstk.transactionregistration.types.ProductTO;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchCustomerInDatabaseException;
@@ -26,6 +27,7 @@ import com.capgemini.jstk.transactionregistration.exceptions.NoSuchTransactionIn
 import com.capgemini.jstk.transactionregistration.exceptions.NotTrustedCustomerException;
 import com.capgemini.jstk.transactionregistration.exceptions.TooHighProductWeightException;
 import com.capgemini.jstk.transactionregistration.exceptions.TooMuchExpensiveProductsException;
+import com.capgemini.jstk.transactionregistration.mappers.ProductMapper;
 import com.capgemini.jstk.transactionregistration.mappers.TransactionMapper;
 import com.capgemini.jstk.transactionregistration.service.TransactionService;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
@@ -155,6 +157,14 @@ public class TransactionServiceImpl implements TransactionService {
 		return transactionRepository.sumOfAllTransactionsWithTransactionStatus(status);
 	}
 	
+	@Override
+	public List<ProductTO> findBestSellingProducts(int amount) {
+		return transactionRepository.findBestSellingProducts(amount)
+				.stream()
+				.map(ProductMapper::toProductTO)
+				.collect(Collectors.toList());
+	}
+	
 	private void checkIfCustomerExists(Long customerId) {
 		if (!customerRepository.exists(customerId)) {
 			throw new NoSuchCustomerInDatabaseException("ID not found!");
@@ -178,11 +188,9 @@ public class TransactionServiceImpl implements TransactionService {
 	private void checkAmountOfProductsAboveSpecifiedPrice(double price, int maxAmount, Collection<Long> productIds) {
 		Map<Long, Integer> productMapWithAmount = new HashMap<>();
 		for (Long key : productIds) {
-			System.out.println("Checking: " + productRepository.findOne(key).getName());
 			if (productRepository.findOne(key).getUnitPrice() > price) {
 				int newValue = (productMapWithAmount.containsKey(key)) ? productMapWithAmount.get(key) + 1 : 1;
 				productMapWithAmount.put(key, newValue);
-				System.out.println("\n\n\n\n IM HERE \n\n\n\n");
 
 			}
 		}

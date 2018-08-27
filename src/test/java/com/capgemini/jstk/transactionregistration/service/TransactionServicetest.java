@@ -326,6 +326,40 @@ public class TransactionServicetest {
 		assertEquals(sum, 2 * 2 * 10 * 500, 0.01);
 	}
 	
+	@Test
+	public void shouldFindTenBestSellingProducts(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct3 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct4 = productService.saveProduct(getCheapProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct2.getId());
+		}
+		productIdList.add(savedProduct3.getId());
+		productIdList.add(savedProduct4.getId());
+		
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		//transactionService.saveTransaction(getTransactionCanceled(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		//transactionService.saveTransaction(getTransactionCanceled(savedCustomer2.getId(), productIdList));
+		
+		// when 
+		List<ProductTO> rankingList = transactionService.findBestSellingProducts(10);
+		
+		// then
+		assertEquals(rankingList.size(), 4);
+		assertEquals(rankingList.get(0).getId(), savedProduct2.getId());
+		assertEquals(rankingList.get(1).getId(), savedProduct1.getId());
+		assertEquals(rankingList.get(2).getId(), savedProduct3.getId());
+	}
+	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())
@@ -368,7 +402,7 @@ public class TransactionServicetest {
 	
 	private ProductTO getCheapProduct(){
 		return new ProductTOBuilder()
-				.withName("Simple product")
+				.withName("Cheap product")
 				.withMarginPercent(0)
 				.withUnitPrice(1)
 				.withWeight(0.1)

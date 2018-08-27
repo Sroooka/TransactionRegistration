@@ -9,11 +9,13 @@ import javax.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepositoryCustom;
+import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QCustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QTransactionEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -74,5 +76,28 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 				.join(qTransaction.products, qProduct)
 				.select(qProduct.unitPrice.sum())
 				.fetchOne();
+	}
+	
+	@Override
+	public List<ProductEntity> findBestSellingProducts(int amount){
+
+		List<Long> maxAmount = queryFactory
+				.select(qProduct.count())
+				.from(qTransaction)
+				.join(qTransaction.products, qProduct)
+				.groupBy(qProduct)
+				.orderBy(qProduct.count().desc())
+				.limit(amount)
+				.fetch();
+		
+		return queryFactory
+				.select(qProduct)
+				.from(qTransaction)
+				.join(qTransaction.products, qProduct)
+				.groupBy(qProduct.id)
+				.orderBy(qProduct.count().desc())
+				.having(qProduct.count().in(maxAmount))
+				.limit(amount)
+				.fetch();
 	}
 }
