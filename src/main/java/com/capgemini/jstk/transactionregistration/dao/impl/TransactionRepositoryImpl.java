@@ -1,14 +1,19 @@
 package com.capgemini.jstk.transactionregistration.dao.impl;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.Subquery;
 
+import org.hibernate.loader.custom.sql.SQLCustomQuery;
 import org.springframework.stereotype.Repository;
 
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepositoryCustom;
+import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QCustomerEntity;
@@ -99,5 +104,43 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 				.having(qProduct.count().in(maxAmount))
 				.limit(amount)
 				.fetch();
+	}
+	
+	@Override
+	public List<CustomerEntity> findCustomersWhoSpentMostMoneyInSpecifiedTime(int amount, Date from, Date to){
+
+		List<Double> maxAmount = queryFactory
+				.select(qProduct.unitPrice.sum())
+				.from(qTransaction)
+				.innerJoin(qTransaction.products, qProduct)
+				.innerJoin(qTransaction.customer, qCustomer)
+				.where(qTransaction.date.between(from, to))
+				.groupBy(qCustomer)
+				.orderBy(qProduct.unitPrice.sum().desc())
+				.limit(amount)
+				.fetch();
+		
+		return queryFactory
+				.select(qCustomer)
+				.from(qTransaction)
+				.innerJoin(qTransaction.products, qProduct)
+				.innerJoin(qTransaction.customer, qCustomer)
+				.where(qTransaction.date.between(from, to))
+				.groupBy(qCustomer)
+				.orderBy(qProduct.unitPrice.sum().desc())
+				.having(qProduct.unitPrice.sum().in(maxAmount))
+				.limit(amount)
+				.fetch();
+	}
+	
+	@Override
+	public double profitFromPeriodTime(Date from, Date to){
+
+		return queryFactory
+				.select(qProduct.unitPrice.multiply(qProduct.marginPercent).multiply(0.01).sum())
+				.from(qTransaction)
+				.innerJoin(qTransaction.products, qProduct)
+				.where(qTransaction.date.between(from, to))
+				.fetchFirst();
 	}
 }

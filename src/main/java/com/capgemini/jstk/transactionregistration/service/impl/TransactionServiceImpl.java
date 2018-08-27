@@ -1,7 +1,10 @@
 package com.capgemini.jstk.transactionregistration.service.impl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,7 @@ import com.capgemini.jstk.transactionregistration.dao.ProductRepository;
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepository;
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
+import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.ProductTO;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
@@ -27,6 +31,7 @@ import com.capgemini.jstk.transactionregistration.exceptions.NoSuchTransactionIn
 import com.capgemini.jstk.transactionregistration.exceptions.NotTrustedCustomerException;
 import com.capgemini.jstk.transactionregistration.exceptions.TooHighProductWeightException;
 import com.capgemini.jstk.transactionregistration.exceptions.TooMuchExpensiveProductsException;
+import com.capgemini.jstk.transactionregistration.mappers.CustomerMapper;
 import com.capgemini.jstk.transactionregistration.mappers.ProductMapper;
 import com.capgemini.jstk.transactionregistration.mappers.TransactionMapper;
 import com.capgemini.jstk.transactionregistration.service.TransactionService;
@@ -213,5 +218,18 @@ public class TransactionServiceImpl implements TransactionService {
 				throw new NotTrustedCustomerException();
 			}
 		}
+	}
+
+	@Override
+	public List<CustomerTO> findCustomersWhoSpentMostMoneyInSpecifiedTime(int amount, Date from, Date to) {
+		return transactionRepository.findCustomersWhoSpentMostMoneyInSpecifiedTime(amount, from, to)
+				.stream()
+				.map(CustomerMapper::toCustomerTO)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public double profitFromPeriodTime(Date from, Date to) {
+		return transactionRepository.profitFromPeriodTime(from, to);
 	}
 }

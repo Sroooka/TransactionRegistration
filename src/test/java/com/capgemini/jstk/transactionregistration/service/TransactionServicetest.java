@@ -360,9 +360,84 @@ public class TransactionServicetest {
 		assertEquals(rankingList.get(2).getId(), savedProduct3.getId());
 	}
 	
+	@Test
+	public void shouldFindCustomersWhoSpendMostMoneyInSpecifiedTime(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		CustomerTO savedCustomer3 = customerService.saveCustomer(getCustomerNowak());
+		CustomerTO savedCustomer4 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct = productService.saveProduct(getCheapProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		
+		
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer3.getId(), productIdList));
+		
+		// when 
+		List<CustomerTO> rankingList = transactionService.findCustomersWhoSpentMostMoneyInSpecifiedTime(3,  new GregorianCalendar(2018, 7, 10).getTime(), new GregorianCalendar(2018, 7, 20).getTime());		
+		
+		// then
+		assertEquals(rankingList.size(), 3);
+		assertEquals(rankingList.get(0).getId(), savedCustomer1.getId());
+		assertEquals(rankingList.get(1).getId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldReturnProfitFromPeriodTime(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		CustomerTO savedCustomer3 = customerService.saveCustomer(getCustomerNowak());
+		CustomerTO savedCustomer4 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct = productService.saveProduct(getCheapProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		
+		
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer3.getId(), productIdList));
+		
+		// when 
+		double profit = transactionService.profitFromPeriodTime(new GregorianCalendar(2018, 7, 10).getTime(), new GregorianCalendar(2018, 7, 20).getTime());		
+		
+		// then
+		assertEquals(profit, 10 * 6 * savedProduct.getUnitPrice() * savedProduct.getMarginPercent() * 0.01, 0.01);
+	}
+	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())
+				.withCustomerId(customerId)
+				.withProductIds(productIds)
+				.withTransactionStatus(TransactionStatus.REALISED)
+				.build();
+	}
+	
+	private TransactionTO getTransactionRealisedWithAnotherDate(Long customerId, Collection<Long> productIds){
+		return new TransactionTOBuilder()
+				.withDate(new GregorianCalendar(2018, 7, 30).getTime())
 				.withCustomerId(customerId)
 				.withProductIds(productIds)
 				.withTransactionStatus(TransactionStatus.REALISED)
@@ -403,7 +478,7 @@ public class TransactionServicetest {
 	private ProductTO getCheapProduct(){
 		return new ProductTOBuilder()
 				.withName("Cheap product")
-				.withMarginPercent(0)
+				.withMarginPercent(30)
 				.withUnitPrice(1)
 				.withWeight(0.1)
 				.build();
