@@ -2,7 +2,9 @@ package com.capgemini.jstk.transactionregistration.dao.impl;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -20,6 +22,8 @@ import com.capgemini.jstk.transactionregistration.domain.query.QCustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QTransactionEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.QTuple;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -142,5 +146,25 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 				.innerJoin(qTransaction.products, qProduct)
 				.where(qTransaction.date.between(from, to))
 				.fetchFirst();
+	}
+	
+	@Override
+	public Map<String, Long> findProductsPreparedForDelivery(){
+
+		List<Tuple> query = queryFactory
+				.select(qProduct.name, qProduct.count())
+				.from(qTransaction)
+				.innerJoin(qTransaction.products, qProduct)
+				.where(qTransaction.status.eq(TransactionStatus.REALISED))
+				.groupBy(qProduct.name)
+				.orderBy(qProduct.count().desc())
+				.fetch();	
+		
+		Map<String, Long> mapProductAndAmount = new HashMap<>();
+
+		for(Tuple row : query){
+			mapProductAndAmount.put(row.get(qProduct.name), row.get(qProduct.count()));
+		}
+		return mapProductAndAmount;
 	}
 }

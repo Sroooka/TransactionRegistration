@@ -3,12 +3,14 @@ package com.capgemini.jstk.transactionregistration.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -426,6 +428,35 @@ public class TransactionServicetest {
 		assertEquals(profit, 10 * 6 * savedProduct.getUnitPrice() * savedProduct.getMarginPercent() * 0.01, 0.01);
 	}
 	
+	@Test
+	public void shouldFindAllProductsPreparedForDeliveryWithNameAndAmount(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		productIdList.add(savedProduct2.getId());
+		
+		transactionService.saveTransaction(getTransactionPreparedForDelivery(savedCustomer1.getId(), productIdList));
+
+		// when 
+		Map<String, Long> list = transactionService.findProductsPreparedForDelivery();
+		for(Map.Entry<String, Long> entry : list.entrySet()) {
+		    System.out.println("key(string): " + entry.getKey());
+		    System.out.println("value(amount): " + entry.getValue());
+		}
+		
+		// then
+		assertEquals(list.size(), 2);
+		assertTrue(list.containsKey(savedProduct1.getName()));
+		assertTrue(list.containsKey(savedProduct2.getName()));
+		assertEquals(list.get(savedProduct1.getName()), new Long(10));
+		assertEquals(list.get(savedProduct2.getName()), new Long(1));
+	}
+	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())
@@ -450,6 +481,15 @@ public class TransactionServicetest {
 				.withCustomerId(customerId)
 				.withProductIds(productIds)
 				.withTransactionStatus(TransactionStatus.CANCELED)
+				.build();
+	}
+	
+	private TransactionTO getTransactionPreparedForDelivery(Long customerId, Collection<Long> productIds){
+		return new TransactionTOBuilder()
+				.withDate(new GregorianCalendar(2018, 7, 25).getTime())
+				.withCustomerId(customerId)
+				.withProductIds(productIds)
+				.withTransactionStatus(TransactionStatus.REALISED)
 				.build();
 	}
 	

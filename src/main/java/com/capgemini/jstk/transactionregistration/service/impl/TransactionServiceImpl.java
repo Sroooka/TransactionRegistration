@@ -36,6 +36,7 @@ import com.capgemini.jstk.transactionregistration.mappers.ProductMapper;
 import com.capgemini.jstk.transactionregistration.mappers.TransactionMapper;
 import com.capgemini.jstk.transactionregistration.service.TransactionService;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
+import com.querydsl.core.Tuple;
 
 @Service
 @Transactional(readOnly = true)
@@ -231,5 +232,10 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public double profitFromPeriodTime(Date from, Date to) {
 		return transactionRepository.profitFromPeriodTime(from, to);
+	}
+
+	@Override
+	public Map<String, Long> findProductsPreparedForDelivery() {
+		return transactionRepository.findProductsPreparedForDelivery();
 	}
 }
