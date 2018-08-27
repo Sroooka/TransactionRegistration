@@ -17,6 +17,7 @@ import com.capgemini.jstk.transactionregistration.dao.CustomerRepository;
 import com.capgemini.jstk.transactionregistration.dao.ProductRepository;
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepository;
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
+import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchCustomerInDatabaseException;
@@ -137,6 +138,19 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public List<TransactionTO> findByProductsAmount(int amount) {
 		return TransactionMapper.map2TOs(transactionRepository.findByProductsAmount(amount));
+	}
+	
+	@Override
+	public double sumOfCustomerTransactions(Long customerId) {
+		//List<TransactionEntity> customerTransactionList = transactionRepository.findByCustomerId(customerId);
+		//double sum = 0.0;
+		//for (TransactionEntity transaction : customerTransactionList) {
+		//	for (ProductEntity product : transaction.getProducts()) {
+		//		sum += product.getUnitPrice();
+		//	}
+		//}
+		//return sum;
+		return transactionRepository.sumOfCustomerTransactions(customerId);
 	}
 	
 	private void checkIfCustomerExists(Long customerId) {

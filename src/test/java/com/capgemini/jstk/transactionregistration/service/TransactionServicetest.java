@@ -263,6 +263,25 @@ public class TransactionServicetest {
 		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), expensiveProductIdList));
 	}
 	
+	@Test
+	public void shouldCountSumOfCustomerTransactionsPrice(){
+		//given
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		
+		// when 
+		double sum = transactionService.sumOfCustomerTransactions(savedCustomer.getId());
+		// then
+		assertEquals(sum, 3 * 10 * 500, 0.01);
+	}
+	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())

@@ -14,4 +14,5 @@ public interface TransactionService {
 	public TransactionTO findTransactionById(Long id);
 	public void setCustomerInTransaction(Long transactionId, Long customerId);
 	public List<TransactionTO> findByProductsAmount(int amount);
+	public double sumOfCustomerTransactions(Long customerId);
 }

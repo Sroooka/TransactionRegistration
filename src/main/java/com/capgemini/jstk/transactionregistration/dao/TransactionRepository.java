@@ -7,4 +7,5 @@ import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 
 public interface TransactionRepository extends CrudRepository<TransactionEntity, Long>, TransactionRepositoryCustom {
 
+
 }

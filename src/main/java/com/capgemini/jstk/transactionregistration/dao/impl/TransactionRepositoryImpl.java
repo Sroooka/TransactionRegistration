@@ -40,4 +40,21 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 				.where(qTransaction.products.size().loe(amount))
 				.fetch();
 	}
+	
+	@Override
+	public List<TransactionEntity> findByCustomerId(Long customerId){
+		return queryFactory.selectFrom(qTransaction)
+				.where(qTransaction.customer.id.loe(customerId))
+				.fetch();
+	}
+	
+	@Override
+	public double sumOfCustomerTransactions(Long customerId){
+		 return queryFactory.from(qTransaction)
+				.where(qTransaction.customer.id.loe(customerId))
+				.join(qTransaction.products, qProduct)
+				.select(qProduct.unitPrice.sum())
+				.fetchOne();
+	}
+
 }
