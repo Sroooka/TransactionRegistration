@@ -4,6 +4,7 @@ package com.capgemini.jstk.transactionregistration.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -20,6 +21,8 @@ import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchCustomerInDatabaseException;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchProductInDatabaseException;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchTransactionInDatabaseException;
+import com.capgemini.jstk.transactionregistration.exceptions.NotTrustedCustomerException;
+import com.capgemini.jstk.transactionregistration.exceptions.TooMuchExpensiveProductsException;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO.CustomerTOBuilder;
@@ -179,9 +182,8 @@ public class TransactionServicetest {
 	public void shouldFindByMinimalProductAmount(){
 		//given
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
-		ProductTO savedProduct = productService.saveProduct(getProduct());
-		HashSet<Long> productIdList = new HashSet<>();
-		productIdList.add(savedProduct.getId());
+		ProductTO savedProduct = productService.saveProduct(getCheapProduct());
+		List<Long> productIdList = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			productIdList.add(savedProduct.getId());
 		}
@@ -191,7 +193,74 @@ public class TransactionServicetest {
 		List<TransactionTO> foundTransactions = transactionService.findByProductsAmount(99);
 		
 		//when
-		assertEquals(foundTransactions.get(0).getId(), savedTransactions.get(0).getId());
+		//assertEquals(foundTransactions.size(), 123123);
+		assertEquals(savedTransactions.size(), 1);
+		assertEquals(savedTransactions.get(0).getProductsAmount(), 100);
+		//assertEquals(foundTransactions.get(0).getId(), savedTransactions.get(0).getId());
+	}
+	
+	@Test
+	public void shouldAddProductsAbove5000ToCustomerWith3RealisedTransactions(){
+		//given
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		
+		ProductTO savedExpensiveProduct = productService.saveProduct(getExpensiveProduct());
+		List<Long> expensiveProductIdList = new ArrayList<>();
+		expensiveProductIdList.add(savedExpensiveProduct.getId());
+		expensiveProductIdList.add(savedExpensiveProduct.getId());
+		
+		// when 
+		List<TransactionTO> transactionList = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), expensiveProductIdList));
+
+		// then
+		assertEquals(transactionList.size(), 1);
+		assertEquals(transactionList.get(0).getProductsAmount(), 2);
+	}
+	
+	@Test (expected = NotTrustedCustomerException.class)
+	public void shouldReturnErrorWhenAddingProductsAbove5000ToCustomerWithout3RealisedTransactions(){
+		//given
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		
+		// when then
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+	}
+	
+	@Test (expected = TooMuchExpensiveProductsException.class)
+	public void shouldReturnErrorWhenAdd3ProductsWithPriceBelow7000(){
+		//given
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		
+		
+		ProductTO savedExpensiveProduct = productService.saveProduct(get10kProduct());
+		List<Long> expensiveProductIdList = new ArrayList<>();
+		for (int i = 0; i < 6; i++) {
+			expensiveProductIdList.add(savedExpensiveProduct.getId());
+		}
+		
+		// when then
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), expensiveProductIdList));
 	}
 	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
@@ -234,12 +303,39 @@ public class TransactionServicetest {
 				.build();
 	}
 	
+	private ProductTO getCheapProduct(){
+		return new ProductTOBuilder()
+				.withName("Simple product")
+				.withMarginPercent(0)
+				.withUnitPrice(1)
+				.withWeight(0.1)
+				.build();
+	}
+	
 	private ProductTO getProduct(){
 		return new ProductTOBuilder()
 				.withName("Simple product")
 				.withMarginPercent(0)
 				.withUnitPrice(500)
 				.withWeight(0.1)
+				.build();
+	}
+	
+	private ProductTO getExpensiveProduct(){
+		return new ProductTOBuilder()
+				.withName("Expensive product")
+				.withMarginPercent(0)
+				.withUnitPrice(4000)
+				.withWeight(0.1)
+				.build();
+	}
+	
+	private ProductTO get10kProduct(){
+		return new ProductTOBuilder()
+				.withName("Expensive product")
+				.withMarginPercent(0)
+				.withUnitPrice(10000)
+				.withWeight(500.0)
 				.build();
 	}
 }

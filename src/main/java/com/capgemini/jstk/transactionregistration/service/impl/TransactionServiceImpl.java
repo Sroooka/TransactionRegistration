@@ -2,7 +2,10 @@ package com.capgemini.jstk.transactionregistration.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +24,7 @@ import com.capgemini.jstk.transactionregistration.exceptions.NoSuchProductInData
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchTransactionInDatabaseException;
 import com.capgemini.jstk.transactionregistration.exceptions.NotTrustedCustomerException;
 import com.capgemini.jstk.transactionregistration.exceptions.TooHighProductWeightException;
+import com.capgemini.jstk.transactionregistration.exceptions.TooMuchExpensiveProductsException;
 import com.capgemini.jstk.transactionregistration.mappers.TransactionMapper;
 import com.capgemini.jstk.transactionregistration.service.TransactionService;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
@@ -42,23 +46,30 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public List<TransactionTO> saveTransaction(TransactionTO transaction) {
 		TransactionEntity transactionEntity = TransactionMapper.toTransactionEntity(transaction);
-		checkIfCustomerExists(transaction.getCustomerId());
 		transactionEntity.setCustomer(customerRepository.findOne(transaction.getCustomerId()));
+
+		checkIfCustomerExists(transaction.getCustomerId());
+		checkIfProductsExists(transaction.getProductIds());
+		checkTotalPriceLowerThan(5000.0, transaction.getProductIds(), transaction.getCustomerId());
+		checkAmountOfProductsAboveSpecifiedPrice(7000.0, 2, transaction.getProductIds());
+		
 		List<TransactionTO> addedTransactionsList = new ArrayList<>();
-		int weightCounter = 0;
-		for (Long key : transaction.getProductIds()) {
-			checkIfProductExists(key);
-			checkProductWeight(key);
+		double weightCounter = 0.0;
+		for (Long key : transaction.getProductIds()) {	
+			checkProductWeightIsNotAbove25Kg(key);
 			weightCounter += productRepository.findOne(key).getWeight();
 			if (weightCounter > 25) {
 				addedTransactionsList.add(TransactionMapper.toTransactionTO(transactionRepository.save(transactionEntity)));
+				customerRepository.findOne(transaction.getCustomerId()).getTransactions().add(transactionEntity);
 				transactionEntity.getProducts().clear();
 				transactionEntity.getProducts().add(productRepository.findOne(key));
+				weightCounter = productRepository.findOne(key).getWeight();
 			} else {
 				transactionEntity.getProducts().add(productRepository.findOne(key));
 			}
-			addedTransactionsList.add(TransactionMapper.toTransactionTO(transactionRepository.save(transactionEntity)));
 		}
+		addedTransactionsList.add(TransactionMapper.toTransactionTO(transactionRepository.save(transactionEntity)));
+		customerRepository.findOne(transaction.getCustomerId()).getTransactions().add(transactionEntity);
 		return addedTransactionsList;
 	}
 
@@ -128,29 +139,55 @@ public class TransactionServiceImpl implements TransactionService {
 		return TransactionMapper.map2TOs(transactionRepository.findByProductsAmount(amount));
 	}
 	
-	private void trustedCustomerValidator(Long customerId) {
-		Set<TransactionEntity> trasactionList = customerRepository.findOne(customerId).getTransactions();
-		trasactionList.stream().map(x -> x.getStatus() == TransactionStatus.REALISED).collect(Collectors.toList());
-		if (trasactionList.size() >= 3) {
-			throw new NotTrustedCustomerException();
-		}
-	}
-	
 	private void checkIfCustomerExists(Long customerId) {
 		if (!customerRepository.exists(customerId)) {
 			throw new NoSuchCustomerInDatabaseException("ID not found!");
 		}
 	}
 	
-	private void checkIfProductExists(Long productId) {
-		if(!productRepository.exists(productId)){
-			throw new NoSuchProductInDatabaseException("ID not found!");
+	private void checkIfProductsExists(Collection<Long> productIds) {
+		for(Long key : productIds){
+			if(!productRepository.exists(key)){
+				throw new NoSuchProductInDatabaseException("ID not found!");
+			}
 		}
 	}
 	
-	private void checkProductWeight(Long productId) {
+	private void checkProductWeightIsNotAbove25Kg(Long productId) {
 		if(productRepository.findOne(productId).getWeight() >= 25){
 			throw new TooHighProductWeightException();
+		}
+	}
+
+	private void checkAmountOfProductsAboveSpecifiedPrice(double price, int maxAmount, Collection<Long> productIds) {
+		Map<Long, Integer> productMapWithAmount = new HashMap<>();
+		for (Long key : productIds) {
+			System.out.println("Checking: " + productRepository.findOne(key).getName());
+			if (productRepository.findOne(key).getUnitPrice() > price) {
+				int newValue = (productMapWithAmount.containsKey(key)) ? productMapWithAmount.get(key) + 1 : 1;
+				productMapWithAmount.put(key, newValue);
+				System.out.println("\n\n\n\n IM HERE \n\n\n\n");
+
+			}
+		}
+		for (Entry<Long, Integer> entry : productMapWithAmount.entrySet()) {
+			if (entry.getValue().intValue() > maxAmount) {
+				throw new TooMuchExpensiveProductsException(price);
+			}
+		}
+	}
+
+	private void checkTotalPriceLowerThan(double maxSum, Collection<Long> productIds, Long customerId) {
+		double counter = 0.0;
+		for (Long key : productIds) {
+			counter += productRepository.findOne(key).getUnitPrice();
+		}
+		if (counter > maxSum) {
+			Set<TransactionEntity> trasactionList = customerRepository.findOne(customerId).getTransactions();
+			trasactionList = trasactionList.stream().filter(x -> x.getStatus() == TransactionStatus.REALISED).collect(Collectors.toSet());
+			if (trasactionList.size() < 3) {
+				throw new NotTrustedCustomerException();
+			}
 		}
 	}
 }
