@@ -129,6 +129,4 @@ public class ProductServiceTest {
 				.withWeight(0.3)
 				.build();
 	}
-	
-
 }

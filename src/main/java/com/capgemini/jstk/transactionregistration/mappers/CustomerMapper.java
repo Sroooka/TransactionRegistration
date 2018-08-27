@@ -10,9 +10,11 @@ import com.capgemini.jstk.transactionregistration.types.CustomerTO.CustomerTOBui
 public class CustomerMapper {
 	
 	public static CustomerTO toCustomerTO(CustomerEntity customerEntity) {
+		
 		if (customerEntity == null) {
 			return null;
 		}
+		
 		return new CustomerTOBuilder()
 				.withId(customerEntity.getId())
 				.withName(customerEntity.getName())
@@ -29,9 +31,11 @@ public class CustomerMapper {
 	}
 	
 	public static CustomerEntity toCustomerEntity(CustomerTO customerTO) {
+		
 		if (customerTO == null) {
 			return null;
 		}
+		
 		CustomerEntity customerEntity = new CustomerEntity();
 		customerEntity.setName(customerTO.getName());
 		customerEntity.setSurname(customerTO.getSurname());

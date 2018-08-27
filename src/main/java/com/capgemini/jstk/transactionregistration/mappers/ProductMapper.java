@@ -10,9 +10,11 @@ import com.capgemini.jstk.transactionregistration.types.ProductTO.ProductTOBuild
 public class ProductMapper {
 	
 	public static ProductTO toProductTO(ProductEntity productEntity) {
+		
 		if (productEntity == null) {
 			return null;
 		}
+		
 		return new ProductTOBuilder()
 				.withId(productEntity.getId())
 				.withName(productEntity.getName())
@@ -27,6 +29,7 @@ public class ProductMapper {
 	}
 	
 	public static ProductEntity toProductEntity(ProductTO productTO) {
+		
 		if (productTO == null) {
 			return null;
 		}

@@ -36,7 +36,6 @@ public class TransactionEntity extends AbstractEntity implements Serializable {
     private Collection<ProductEntity> products = new ArrayList<>();
 
 	public TransactionEntity() {
-		super();
 	}
 	
 	@PostPersist

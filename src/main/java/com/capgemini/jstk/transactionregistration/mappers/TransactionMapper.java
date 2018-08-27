@@ -11,9 +11,11 @@ import com.capgemini.jstk.transactionregistration.types.TransactionTO.Transactio
 public class TransactionMapper {
 	
 	public static TransactionTO toTransactionTO(TransactionEntity transactionEntity) {
+		
 		if (transactionEntity == null) {
 			return null;
 		}
+		
 		Long customerId = (transactionEntity.getCustomer() == null) ? -1L : transactionEntity.getCustomer().getId();
 		return new TransactionTOBuilder()
 				.withId(transactionEntity.getId())
@@ -32,6 +34,7 @@ public class TransactionMapper {
 		if (transactionTO == null) {
 			return null;
 		}
+		
 		TransactionEntity transactionEntity = new TransactionEntity();
 		transactionEntity.setDate(transactionTO.getDate());
 		transactionEntity.setStatus(transactionTO.getStatus());

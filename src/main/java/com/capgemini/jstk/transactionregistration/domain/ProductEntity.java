@@ -33,7 +33,6 @@ public class ProductEntity extends AbstractEntity implements Serializable {
 	private Collection<TransactionEntity> transactions = new ArrayList<>();
 	
 	public ProductEntity() {
-		super();
 	}
 
 	public String getName() {

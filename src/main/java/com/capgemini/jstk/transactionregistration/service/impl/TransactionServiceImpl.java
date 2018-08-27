@@ -1,10 +1,8 @@
 package com.capgemini.jstk.transactionregistration.service.impl;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,6 @@ import com.capgemini.jstk.transactionregistration.dao.CustomerRepository;
 import com.capgemini.jstk.transactionregistration.dao.ProductRepository;
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepository;
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
-import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.ProductTO;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
@@ -37,7 +34,6 @@ import com.capgemini.jstk.transactionregistration.mappers.ProductMapper;
 import com.capgemini.jstk.transactionregistration.mappers.TransactionMapper;
 import com.capgemini.jstk.transactionregistration.service.TransactionService;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
-import com.querydsl.core.Tuple;
 
 @Service
 @Transactional(readOnly = true)
@@ -55,6 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Transactional(readOnly = false)
 	@Override
 	public List<TransactionTO> saveTransaction(TransactionTO transaction) {
+		
 		TransactionEntity transactionEntity = TransactionMapper.toTransactionEntity(transaction);
 		transactionEntity.setCustomer(customerRepository.findOne(transaction.getCustomerId()));
 
@@ -73,11 +70,14 @@ public class TransactionServiceImpl implements TransactionService {
 				customerRepository.findOne(transaction.getCustomerId()).getTransactions().add(transactionEntity);
 				transactionEntity.getProducts().clear();
 				transactionEntity.getProducts().add(productRepository.findOne(key));
+				productRepository.findOne(key).getTransactions().add(transactionEntity);
 				weightCounter = productRepository.findOne(key).getWeight();
 			} else {
 				transactionEntity.getProducts().add(productRepository.findOne(key));
+				productRepository.findOne(key).getTransactions().add(transactionEntity);
 			}
 		}
+		
 		addedTransactionsList.add(TransactionMapper.toTransactionTO(transactionRepository.save(transactionEntity)));
 		customerRepository.findOne(transaction.getCustomerId()).getTransactions().add(transactionEntity);
 		return addedTransactionsList;
@@ -86,9 +86,11 @@ public class TransactionServiceImpl implements TransactionService {
 	@Transactional(readOnly = false)
 	@Override
 	public TransactionTO updateTransaction(TransactionTO transaction) {
+		
 		if(!transactionRepository.exists(transaction.getId())){
 			throw new NoSuchTransactionInDatabaseException("ID not found!");
 		}
+		
 		TransactionEntity transactionEntity = transactionRepository.findOne(transaction.getId());
 		transactionEntity.setDate(transaction.getDate());
 		transactionEntity.setStatus(transaction.getStatus());
@@ -100,9 +102,11 @@ public class TransactionServiceImpl implements TransactionService {
 	@Transactional(readOnly = false)
 	@Override
 	public TransactionTO deleteTransaction(TransactionTO transaction) {
+		
 		if(!transactionRepository.exists(transaction.getId())){
 			throw new NoSuchTransactionInDatabaseException("ID not found!");
 		}
+		
 		transactionRepository.delete(transaction.getId());
 		return transaction;
 	}
@@ -114,6 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	public int size() {
+		
 		if (transactionRepository.findAll() instanceof Collection) {
 		    return ((Collection<?>) transactionRepository.findAll()).size();
 		}
@@ -122,6 +127,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	public TransactionTO findTransactionById(Long id) {
+		
 		if(!transactionRepository.exists(id)){
 			throw new NoSuchTransactionInDatabaseException("ID not found!");
 		}
@@ -130,6 +136,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	public void setCustomerInTransaction(Long transactionId, Long customerId) {
+		
 		if(!transactionRepository.exists(transactionId)){
 			throw new NoSuchTransactionInDatabaseException("ID not found!");
 		}
@@ -166,6 +173,7 @@ public class TransactionServiceImpl implements TransactionService {
 	
 	@Override
 	public List<ProductTO> findBestSellingProducts(int amount) {
+		
 		return transactionRepository.findBestSellingProducts(amount)
 				.stream()
 				.map(ProductMapper::toProductTO)

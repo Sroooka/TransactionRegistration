@@ -1,6 +1,5 @@
 package com.capgemini.jstk.transactionregistration.dao.impl;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +8,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.Subquery;
-
-import org.hibernate.loader.custom.sql.SQLCustomQuery;
 import org.springframework.stereotype.Repository;
 
 import com.capgemini.jstk.transactionregistration.dao.TransactionRepositoryCustom;
@@ -25,8 +21,6 @@ import com.capgemini.jstk.transactionregistration.domain.query.QTransactionEntit
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.QTuple;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -36,12 +30,16 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
     protected EntityManager entityManager;
 	
 	private JPAQueryFactory queryFactory;
+	
 	private QCustomerEntity qCustomer;
+	
 	private QProductEntity qProduct;
+	
 	private QTransactionEntity qTransaction;
 	
 	@PostConstruct
 	private void init(){
+		
 		queryFactory = new JPAQueryFactory(entityManager);
 		qCustomer = QCustomerEntity.customerEntity;
 		qProduct = QProductEntity.productEntity;
@@ -50,6 +48,7 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 	 
 	@Override
 	public List<TransactionEntity> findByProductsAmount(int amount){
+		
 		return queryFactory.selectFrom(qTransaction)
 				.where(qTransaction.products.size().loe(amount))
 				.fetch();
@@ -57,6 +56,7 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 	
 	@Override
 	public List<TransactionEntity> findByCustomerId(Long customerId){
+		
 		return queryFactory.selectFrom(qTransaction)
 				.where(qTransaction.customer.id.loe(customerId))
 				.fetch();
@@ -64,6 +64,7 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 	
 	@Override
 	public double sumOfCustomerTransactions(Long customerId){
+		
 		 return queryFactory.from(qTransaction)
 				.where(qTransaction.customer.id.loe(customerId))
 				.join(qTransaction.products, qProduct)
@@ -73,6 +74,7 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 
 	@Override
 	public double sumOfCustomerTransactionsWithTransactionStatus(Long customerId, TransactionStatus status){
+		
 		return queryFactory.from(qTransaction)
 				.where(qTransaction.customer.id.loe(customerId), qTransaction.status.eq(status))
 				.join(qTransaction.products, qProduct)
@@ -82,6 +84,7 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 	
 	@Override
 	public double sumOfAllTransactionsWithTransactionStatus(TransactionStatus status){
+		
 		return queryFactory.from(qTransaction)
 				.where(qTransaction.status.eq(status))
 				.join(qTransaction.products, qProduct)
@@ -167,6 +170,7 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 		for (Tuple row : query) {
 			mapProductAndAmount.put(row.get(qProduct.name), row.get(qProduct.count()));
 		}
+		
 		return mapProductAndAmount;
 	}
 

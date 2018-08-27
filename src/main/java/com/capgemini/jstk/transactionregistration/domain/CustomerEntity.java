@@ -33,9 +33,7 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 	private String phone;
 	
 	private String address;
-	
-	private boolean verifiedClient;
-	
+		
 	@Temporal(TemporalType.DATE)
 	private Date birth;
 	
@@ -43,12 +41,6 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
     Set<TransactionEntity> transactions = new HashSet<>();
 
 	public CustomerEntity() {
-	}
-
-	@PostPersist
-	@PostUpdate
-	private void updateVerifiedClient() {
-		verifiedClient = (transactions.size() >= 3);
 	}
 	
 	public String getName() {
@@ -105,13 +97,5 @@ public class CustomerEntity extends AbstractEntity implements Serializable {
 
 	public void setTransactions(Set<TransactionEntity> transaction) {
 		this.transactions = transaction;
-	}
-
-	public boolean isVerifiedClient() {
-		return verifiedClient;
-	}
-
-	public void setVerifiedClient(boolean verifiedClient) {
-		this.verifiedClient = verifiedClient;
 	}
 }

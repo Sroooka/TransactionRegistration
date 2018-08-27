@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,6 +159,7 @@ public class TransactionServicetest {
 		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
 		List<TransactionTO> savedTransactions = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
 		savedTransactions.get(0).setId(123123123L);
+		
 		//when then
 		transactionService.deleteTransaction(savedTransactions.get(0));
 	}
@@ -194,13 +194,11 @@ public class TransactionServicetest {
 		List<TransactionTO> savedTransactions = transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
 		
 		//when
-		List<TransactionTO> foundTransactions = transactionService.findByProductsAmount(99);
+		transactionService.findByProductsAmount(99);
 		
 		//when
-		//assertEquals(foundTransactions.size(), 123123);
 		assertEquals(savedTransactions.size(), 1);
 		assertEquals(savedTransactions.get(0).getProductsAmount(), 100);
-		//assertEquals(foundTransactions.get(0).getId(), savedTransactions.get(0).getId());
 	}
 	
 	@Test
@@ -256,7 +254,6 @@ public class TransactionServicetest {
 		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
 		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
 		
-		
 		ProductTO savedExpensiveProduct = productService.saveProduct(get10kProduct());
 		List<Long> expensiveProductIdList = new ArrayList<>();
 		for (int i = 0; i < 6; i++) {
@@ -282,6 +279,7 @@ public class TransactionServicetest {
 		
 		// when 
 		double sum = transactionService.sumOfCustomerTransactions(savedCustomer.getId());
+		
 		// then
 		assertEquals(sum, 3 * 10 * 500, 0.01);
 	}
@@ -350,9 +348,7 @@ public class TransactionServicetest {
 		productIdList.add(savedProduct4.getId());
 		
 		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
-		//transactionService.saveTransaction(getTransactionCanceled(savedCustomer1.getId(), productIdList));
 		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
-		//transactionService.saveTransaction(getTransactionCanceled(savedCustomer2.getId(), productIdList));
 		
 		// when 
 		List<ProductTO> rankingList = transactionService.findBestSellingProducts(10);
@@ -376,7 +372,6 @@ public class TransactionServicetest {
 		for (int i = 0; i < 5; i++) {
 			productIdList.add(savedProduct.getId());
 		}
-		
 		
 		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
 		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
@@ -410,7 +405,6 @@ public class TransactionServicetest {
 		for (int i = 0; i < 10; i++) {
 			productIdList.add(savedProduct.getId());
 		}
-		
 		
 		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
 		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer4.getId(), productIdList));
@@ -550,7 +544,7 @@ public class TransactionServicetest {
 		for (int i = 0; i < 10; i++) {
 			productIdList.add(savedProduct1.getId());
 		}
-		List<TransactionTO> savedTransaction1 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
 		productIdList.add(savedProduct2.getId());
 		List<TransactionTO> savedTransaction2 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer2.getId(), productIdList));
 
@@ -633,7 +627,7 @@ public class TransactionServicetest {
 		for (int i = 0; i < 10; i++) {
 			productIdList.add(savedProduct1.getId());
 		}
-		List<TransactionTO> savedTransaction1 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
 		productIdList.add(savedProduct2.getId());
 		List<TransactionTO> savedTransaction2 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer2.getId(), productIdList));
 
