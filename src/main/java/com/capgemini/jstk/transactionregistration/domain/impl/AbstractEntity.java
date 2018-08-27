@@ -20,8 +20,7 @@ public abstract class AbstractEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-	@Version 
-	public int version;
+	@Version private int version;
 	
 	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)

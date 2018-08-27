@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -897,7 +898,7 @@ public class TransactionServicetest {
 		//then
 		assertFalse(transactionService.contains(savedTransaction1.get(0).getId()));
 	}
-	
+
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())

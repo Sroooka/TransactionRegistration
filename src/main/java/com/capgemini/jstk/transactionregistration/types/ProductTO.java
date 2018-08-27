@@ -16,7 +16,7 @@ public class ProductTO {
 	private int marginPercent;
 	
 	private double weight;
-	
+		
 	private Collection<Long> transactionIds = new HashSet<>();
 
 	public ProductTO() {

@@ -19,7 +19,7 @@ public class TransactionTO {
 	private int productsAmount;
 	
 	private Long customerId;
-	
+		
     private Collection<Long> productIds = new HashSet<>();
 
 	public TransactionTO() {
@@ -48,6 +48,7 @@ public class TransactionTO {
 		private int productsAmount;
 		
 		private Long customerId;
+		
 		
 	    private Collection<Long> productIds = new HashSet<>();
 	    
