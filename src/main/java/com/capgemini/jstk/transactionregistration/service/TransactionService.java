@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
+import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
+import com.capgemini.jstk.transactionregistration.domain.TransactionSearchCriteria;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.ProductTO;
@@ -28,4 +30,5 @@ public interface TransactionService {
 	public List<CustomerTO> findCustomersWhoSpentMostMoneyInSpecifiedTime(int amount, Date from, Date to);
 	public double profitFromPeriodTime(Date from, Date to);
 	public Map<String, Long> findProductsPreparedForDelivery();
+	public List<TransactionTO> findBySearchCriteria(TransactionSearchCriteria criteria);
 }

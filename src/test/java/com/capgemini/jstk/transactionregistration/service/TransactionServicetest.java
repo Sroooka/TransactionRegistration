@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.capgemini.jstk.transactionregistration.domain.TransactionSearchCriteria;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchCustomerInDatabaseException;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchProductInDatabaseException;
@@ -455,6 +456,446 @@ public class TransactionServicetest {
 		assertTrue(list.containsKey(savedProduct2.getName()));
 		assertEquals(list.get(savedProduct1.getName()), new Long(10));
 		assertEquals(list.get(savedProduct2.getName()), new Long(1));
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerName(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setCustomerName("Jan");
+		criteria.setCustomerSurame("Kowalski");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+		
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer1.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaPeriodTime(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaProductId(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		productIdList.add(savedProduct2.getId());
+		List<TransactionTO> savedTransaction1 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), new ArrayList<Long>()));
+
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setProductId(savedProduct1.getId());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getId(), savedTransaction1.get(0).getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaTotalTransactionCost(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		List<TransactionTO> savedTransaction1 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		List<TransactionTO> savedTransaction2 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer2.getId(), productIdList));
+
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getId(), savedTransaction2.get(0).getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerNameAndDate(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setProductId(savedProduct2.getId());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerNameAndProductId(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerNameTotalCost(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		List<TransactionTO> savedTransaction1 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		List<TransactionTO> savedTransaction2 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer2.getId(), productIdList));
+
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getId(), savedTransaction2.get(0).getId());
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaPeriodTimeAndProductId(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setProductId(savedProduct2.getId());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaPeriodTimeAndTotalPrice(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaProductIdAndTotalPrice(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setProductId(savedProduct1.getId());
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaProductIdAndTotalPriceAndPeriodTime(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setProductId(savedProduct1.getId());
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerNameProcuctIdAndTotalPrice(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setProductId(savedProduct1.getId());
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerNamePeriodTimeAndTotalPrice(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByCriteriaCustomerNamePeriodTimeAndProductId(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setProductId(savedProduct1.getId());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldFindByAllCriteria(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct1 = productService.saveProduct(getCheapProduct());
+		ProductTO savedProduct2 = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct1.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer1.getId(), productIdList));
+		productIdList.add(savedProduct2.getId());
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		
+		TransactionSearchCriteria criteria = new TransactionSearchCriteria();
+		criteria.setFrom(new GregorianCalendar(2018, 7, 10).getTime());
+		criteria.setTo(new GregorianCalendar(2018, 7, 20).getTime());
+		criteria.setProductId(savedProduct1.getId());
+		criteria.setCustomerName("Krzysztof");
+		criteria.setCustomerSurame("Nowak");
+		criteria.setTotalPrice(10 * savedProduct1.getUnitPrice() + savedProduct2.getUnitPrice());
+		
+		// when 
+		List<TransactionTO> list = transactionService.findBySearchCriteria(criteria);
+
+		// then
+		assertEquals(list.size(), 1);
+		assertEquals(list.get(0).getCustomerId(), savedCustomer2.getId());
+	}
+	
+	@Test
+	public void shouldCascadeWorkCorrectWhenDeletingCustomer(){
+		//given
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct = productService.saveProduct(getCheapProduct());
+		List<Long> productIdList = new ArrayList<>();
+		productIdList.add(savedProduct.getId());
+		List<TransactionTO> savedTransaction1 = transactionService.saveTransaction(getTransactionRealisedWithAnotherDate(savedCustomer.getId(), productIdList));
+
+		//when
+		customerService.deleteCustomer(savedCustomer);
+		
+		//then
+		assertFalse(transactionService.contains(savedTransaction1.get(0).getId()));
 	}
 	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){

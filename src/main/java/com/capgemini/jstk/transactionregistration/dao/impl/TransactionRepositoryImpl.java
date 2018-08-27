@@ -18,10 +18,12 @@ import com.capgemini.jstk.transactionregistration.dao.TransactionRepositoryCusto
 import com.capgemini.jstk.transactionregistration.domain.CustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
+import com.capgemini.jstk.transactionregistration.domain.TransactionSearchCriteria;
 import com.capgemini.jstk.transactionregistration.domain.query.QCustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QTransactionEntity;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.QTuple;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -162,9 +164,53 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 		
 		Map<String, Long> mapProductAndAmount = new HashMap<>();
 
-		for(Tuple row : query){
+		for (Tuple row : query) {
 			mapProductAndAmount.put(row.get(qProduct.name), row.get(qProduct.count()));
 		}
 		return mapProductAndAmount;
 	}
+
+	@Override
+	public List<TransactionEntity> findBySearchCriteria(TransactionSearchCriteria criteria) {
+
+		BooleanBuilder predictor = new BooleanBuilder();
+
+		if (criteria.getCustomerName() != null && 
+			!criteria.getCustomerName().isEmpty() &&
+			criteria.getCustomerSurame() != null && 
+			!criteria.getCustomerSurame().isEmpty()) 
+		{
+			predictor.and(qCustomer.name.eq(criteria.getCustomerName()));
+			predictor.and(qCustomer.surname.eq(criteria.getCustomerSurame()));
+		}
+
+		if (criteria.getFrom() != null && criteria.getTo() != null) {
+			predictor.and(qTransaction.date.between(criteria.getFrom(), criteria.getTo()));
+		}
+
+		if (criteria.getProductId() != null && criteria.getProductId() > 0L) {
+			predictor.and(qProduct.id.eq(criteria.getProductId()));
+		}
+
+		if (criteria.getTotalPrice() > 0) {
+			List<Long> transactionIdsWithTotalCost = queryFactory
+					.select(qTransaction.id)
+					.from(qTransaction)
+					.join(qTransaction.products, qProduct)
+					.groupBy(qTransaction)
+					.having(qProduct.unitPrice.sum().eq(criteria.getTotalPrice()))
+					.fetch();
+			predictor.and(qTransaction.id.in(transactionIdsWithTotalCost));
+		}
+
+		return queryFactory
+				.select(qTransaction)
+				.from(qTransaction)
+				.innerJoin(qTransaction.products, qProduct)
+				.innerJoin(qTransaction.customer, qCustomer)
+				.groupBy(qTransaction)
+				.where(predictor)
+				.fetch();
+	}
 }
+

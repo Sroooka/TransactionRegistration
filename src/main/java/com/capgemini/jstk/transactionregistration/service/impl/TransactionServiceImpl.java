@@ -24,6 +24,7 @@ import com.capgemini.jstk.transactionregistration.domain.ProductEntity;
 import com.capgemini.jstk.transactionregistration.types.CustomerTO;
 import com.capgemini.jstk.transactionregistration.types.ProductTO;
 import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
+import com.capgemini.jstk.transactionregistration.domain.TransactionSearchCriteria;
 import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchCustomerInDatabaseException;
 import com.capgemini.jstk.transactionregistration.exceptions.NoSuchProductInDatabaseException;
@@ -237,5 +238,13 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public Map<String, Long> findProductsPreparedForDelivery() {
 		return transactionRepository.findProductsPreparedForDelivery();
+	}
+
+	@Override
+	public List<TransactionTO> findBySearchCriteria(TransactionSearchCriteria criteria) {
+		return transactionRepository.findBySearchCriteria(criteria)
+				.stream()
+				.map(TransactionMapper::toTransactionTO)
+				.collect(Collectors.toList());
 	}
 }
