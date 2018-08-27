@@ -142,15 +142,17 @@ public class TransactionServiceImpl implements TransactionService {
 	
 	@Override
 	public double sumOfCustomerTransactions(Long customerId) {
-		//List<TransactionEntity> customerTransactionList = transactionRepository.findByCustomerId(customerId);
-		//double sum = 0.0;
-		//for (TransactionEntity transaction : customerTransactionList) {
-		//	for (ProductEntity product : transaction.getProducts()) {
-		//		sum += product.getUnitPrice();
-		//	}
-		//}
-		//return sum;
 		return transactionRepository.sumOfCustomerTransactions(customerId);
+	}
+	
+	@Override
+	public double sumOfCustomerTransactionsWithTransactionStatus(Long customerId, TransactionStatus status) {
+		return transactionRepository.sumOfCustomerTransactionsWithTransactionStatus(customerId, status);
+	}
+	
+	@Override
+	public double sumOfTransactionsWithTransactionStatus(TransactionStatus status) {
+		return transactionRepository.sumOfAllTransactionsWithTransactionStatus(status);
 	}
 	
 	private void checkIfCustomerExists(Long customerId) {

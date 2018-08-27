@@ -3,6 +3,7 @@ package com.capgemini.jstk.transactionregistration.service;
 import java.util.Collection;
 import java.util.List;
 
+import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.capgemini.jstk.transactionregistration.types.TransactionTO;
 
 public interface TransactionService {
@@ -15,4 +16,6 @@ public interface TransactionService {
 	public void setCustomerInTransaction(Long transactionId, Long customerId);
 	public List<TransactionTO> findByProductsAmount(int amount);
 	public double sumOfCustomerTransactions(Long customerId);
+	public double sumOfCustomerTransactionsWithTransactionStatus(Long customerId, TransactionStatus status);
+	public double sumOfTransactionsWithTransactionStatus(TransactionStatus status);
 }

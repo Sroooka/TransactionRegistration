@@ -13,6 +13,7 @@ import com.capgemini.jstk.transactionregistration.domain.TransactionEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QCustomerEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QProductEntity;
 import com.capgemini.jstk.transactionregistration.domain.query.QTransactionEntity;
+import com.capgemini.jstk.transactionregistration.enums.TransactionStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -57,4 +58,21 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
 				.fetchOne();
 	}
 
+	@Override
+	public double sumOfCustomerTransactionsWithTransactionStatus(Long customerId, TransactionStatus status){
+		return queryFactory.from(qTransaction)
+				.where(qTransaction.customer.id.loe(customerId), qTransaction.status.eq(status))
+				.join(qTransaction.products, qProduct)
+				.select(qProduct.unitPrice.sum())
+				.fetchOne();
+	}
+	
+	@Override
+	public double sumOfAllTransactionsWithTransactionStatus(TransactionStatus status){
+		return queryFactory.from(qTransaction)
+				.where(qTransaction.status.eq(status))
+				.join(qTransaction.products, qProduct)
+				.select(qProduct.unitPrice.sum())
+				.fetchOne();
+	}
 }

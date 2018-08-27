@@ -282,6 +282,50 @@ public class TransactionServicetest {
 		assertEquals(sum, 3 * 10 * 500, 0.01);
 	}
 	
+	@Test
+	public void shouldCountSumOfCustomerTransactionsPriceWithSpecifiedStatus(){
+		//given
+		CustomerTO savedCustomer = customerService.saveCustomer(getCustomerKowalski());
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionCanceled(savedCustomer.getId(), productIdList));
+		
+		// when 
+		double sum = transactionService.sumOfCustomerTransactionsWithTransactionStatus(savedCustomer.getId(), TransactionStatus.REALISED);
+		
+		// then
+		assertEquals(sum, 2 * 10 * 500, 0.01);
+	}
+	
+	@Test
+	public void shouldCountSumOfAllTransactionsPriceWithSpecifiedStatus(){
+		//given
+		CustomerTO savedCustomer1 = customerService.saveCustomer(getCustomerKowalski());
+		CustomerTO savedCustomer2 = customerService.saveCustomer(getCustomerNowak());
+		ProductTO savedProduct = productService.saveProduct(getProduct());
+		List<Long> productIdList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			productIdList.add(savedProduct.getId());
+		}
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionCanceled(savedCustomer1.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionRealised(savedCustomer2.getId(), productIdList));
+		transactionService.saveTransaction(getTransactionCanceled(savedCustomer2.getId(), productIdList));
+		
+		// when 
+		double sum = transactionService.sumOfTransactionsWithTransactionStatus(TransactionStatus.REALISED);
+		
+		// then
+		assertEquals(sum, 2 * 2 * 10 * 500, 0.01);
+	}
+	
 	private TransactionTO getTransactionRealised(Long customerId, Collection<Long> productIds){
 		return new TransactionTOBuilder()
 				.withDate(new GregorianCalendar(2018, 7, 15).getTime())
